@@ -1,0 +1,36 @@
+# .gitignore — 敏感数据与构建产物一律不提交
+# ====================================================
+
+# 密钥/凭据（防止 API Key 泄露）
+.env
+.env.*
+*.pem
+*.key
+secrets/
+credentials/
+
+# 本地会话可能包含敏感代码/路径，默认忽略，发布时按需挑选
+results/
+*.jsonl
+*.stderr.log
+
+# 临时文件
+/tmp/
+*.tmp
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Python 编译产物
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Node 依赖
+node_modules/
+
+# 打包产物
+dist/
+build/
