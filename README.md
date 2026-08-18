@@ -80,9 +80,25 @@ ollama run qwen3.8:27b
 ├── benchmarks/       # 基准测试任务（Agent 作业）
 ├── configs/          # 配置文件
 ├── results/          # 实测输出（JSONL 会话 + 速度 + 内存）
-├── docs/             # 详细分析
+├── docs/
+│   ├── model-architecture.md      # 架构深挖（算法视角）：混合注意力/MTP/KV 数学
+│   ├── quantization-and-kvcache.md# 量化与 KV cache（工程视角）：内存账本/带宽理论
+│   ├── benchmark-methodology.md   # 评测方法论：测什么/怎么测/变量控制
+│   ├── benchmark-results-template.md # 实测结果模板
+│   ├── ollama-tuning.md           # Ollama 参数详解
+│   └── dsh-integration.md         # dsh 接入本地模型配置
 └── README.md
 ```
+
+## 相关文档
+
+| 文档 | 面向 | 内容 |
+|---|---|---|
+| [docs/model-architecture.md](docs/model-architecture.md) | 算法工程师 | 3:1 混合注意力、DeltaNet、MTP、KV 数学 |
+| [docs/quantization-and-kvcache.md](docs/quantization-and-kvcache.md) | 工程同学 | Q4_K_M 原理、KV 公式、带宽理论 |
+| [docs/benchmark-methodology.md](docs/benchmark-methodology.md) | 所有人 | 三层评测协议、变量控制、指标定义 |
+| [docs/ollama-tuning.md](docs/ollama-tuning.md) | Ollama 用户 | 四个核心参数、版本坑 |
+| [docs/dsh-integration.md](docs/dsh-integration.md) | Agent 用户 | 把 dsh 指向本地模型 |
 
 ## License
 
