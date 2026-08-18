@@ -11,6 +11,8 @@ credentials/
 
 # 本地会话可能包含敏感代码/路径，默认忽略，发布时按需挑选
 results/
+!results/benchmark-round1.md
+!results/env-conditions.txt
 *.jsonl
 *.stderr.log
 

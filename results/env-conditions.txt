@@ -1,0 +1,48 @@
+# 实测环境条件快照
+# 采集时间: 2026-08-18
+
+## 硬件
+- MacBook Pro, Apple M5 Pro (20 核 GPU)
+- 24 GB 统一内存
+
+## 软件
+- Ollama 0.32.14 (GUI app)
+- Qwen3.8-27B, Q4_K_M (官方标签), 17GB 权重 + 931MB 视觉投影
+- dsh 0.1.0-rc.7
+
+## Ollama 运行时参数（llama-server 实际生效，ps 确认）
+- --cache-type-k q8_0 --cache-type-v q8_0
+- --flash-attn on
+- -c 8192 (上下文 8K)
+- --spec-type draft-mtp --spec-draft-n-max 4 (MTP 投机解码, 默认)
+- --chat-template chatml
+
+## 真实办公负载（未关闭任何应用，这是评测核心条件）
+后台运行中的主要应用:
+- Lark/飞书 (多个进程)
+- IntelliJ IDEA
+- Warp 终端
+- Google Chrome (多个进程)
+- opencode (本次会话)
+- Ollama GUI
+
+## 内存快照（推理期间）
+- 物理内存: 24 GB
+- swap used: 8.3-8.5 GB (峰值 9.2GB 上限)
+- 系统可用内存: 9% (峰值压力)
+- 说明: 模型 17GB + 系统 + 办公应用 > 24GB, 触发 macOS 内存压缩和 swap
+
+## 实测速度（连续 3 次短对话, thinking=low）
+- 测试1 (is_prime): eval 6.76 tok/s, prefill 4.26 tok/s, 130 tokens, 26.8s
+- 测试2 (递归解释): eval 3.71 tok/s, prefill 7.42 tok/s, 104 tokens, 32.0s
+- 测试3 (hi):         eval 4.24 tok/s, prefill 7.29 tok/s, 57 tokens,  27.0s
+- 结论: 内存颠簸导致速度剧烈波动, 远低于 M5 Pro 理论带宽上限 (~18 tok/s 纯权重读取)
+
+## 内存审计
+- llama-server RSS: 14.5 GB (模型主体, mmap 懒加载)
+- 系统其他: swap 8.5GB 意味着 ~8.5GB 被换出到磁盘
+
+## 归因
+- 速度瓶颈 = 内存容量不足导致 swap 颠簸, 不是 M5 Pro 的带宽能力问题
+- 24GB 跑 Q4_K_M(17GB) + 办公负载 = swap, 速度崩到 2.6-7 tok/s
+- 若想无 swap 运行, 需要: 关闭后台应用 或 降低量化 (Q3_K_M 13GB) 或 换 32GB+ 机器
