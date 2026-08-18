@@ -28,6 +28,9 @@ __pycache__/
 *.pyo
 .pytest_cache/
 
+# Agent 任务运行副本（测试产物）
+benchmarks/workspace/runs/
+
 # Node 依赖
 node_modules/
 

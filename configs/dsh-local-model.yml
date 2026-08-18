@@ -1,0 +1,16 @@
+# dsh 配置覆盖：把默认模型指向本地 Ollama 的 Qwen3.8-27B
+# 并彻底移除 sandbox_permissions 工具字段（Qwen 误传该参数会导致 edit 被拒）
+# 用法: npx @deepseek-ai/dsh --profile headless --patch ./configs/dsh-local-model.yml "任务"
+# 说明: DSH_MODEL 环境变量不作用于 agent-default-model, 必须用 patch 覆盖
+# 格式: 顶层必须是 YAML 数组（每个 - id: 是一个 patch 项）
+
+- id: agent-default-model
+  config:
+    provider: deepseek-official
+    model: qwen3.8:27b
+
+# mode 置 undefined -> fs-sandbox 的 defaultMode=undefined -> escalationModes=[]
+# -> edit/write 工具 schema 不再暴露 sandbox_permissions/justification 字段
+- id: sandbox-policy
+  config:
+    mode: !!js undefined

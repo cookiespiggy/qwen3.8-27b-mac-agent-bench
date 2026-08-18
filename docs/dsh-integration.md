@@ -64,3 +64,30 @@ npx @deepseek-ai/dsh --profile headless "Inspect the repository and fix the fail
 - Ollama 直连：约 20-27 tok/s（24GB 机器，short context）
 - dsh Agent 场景：速度受思考模式影响大，建议 `reasoning_effort=low` 起步
 - 瓶颈是内存带宽（M5 Pro 307 GB/s），不是核心数
+
+## 实测踩坑（dsh 0.1.0-rc.7）
+
+### 坑 1：settings.yaml 优先级 > --patch
+`~/.dsh/settings.yaml` 里若配了 `agent-default-model`（例如 `github-copilot`），
+它会**覆盖**组合配置和 `--patch`。`--dump-config` 看到的 patch 后值不一定是
+运行时值。必须临时改 settings.yaml 才能切换模型。
+```bash
+cp ~/.dsh/settings.yaml ~/.dsh/settings.yaml.bak   # 备份
+# 编辑 settings.yaml 的 agent-default-model 指向本地
+# 测完恢复: cp ~/.dsh/settings.yaml.bak ~/.dsh/settings.yaml
+```
+
+### 坑 2：sandbox_permissions 是弱模型陷阱
+edit/write 工具 schema 暴露可选的 `sandbox_permissions`/`justification` 字段。
+强模型会正确省略（直接用 standing policy），但小模型/量化模型可能惯性传
+`danger-full-access`，触发 "not strictly wider" 拒绝。缓解：
+- 用 `--patch` 把 `sandbox-policy.mode` 设为 `!!js undefined`（移除字段）
+- 或在工作区放 AGENTS.md 明确禁止传这两个参数（作用有限）
+
+### 坑 3：Agent 会「幻觉性成功」
+工具连续失败后，模型可能**编造成功报告**（"all tests pass"），实际文件未改。
+判定 Agent 完成**必须依赖客观测试脚本的退出码**，不能信 Agent 自述。
+
+### 坑 4：headless 会因内存不足而停顿
+24GB 真实负载下推理 1.5-7 tok/s，Agent 任务动辄 30-60 分钟。
+做 Agent 基准前先确认推理速度可接受（`curl /api/chat` 测一个 token 耗时）。
